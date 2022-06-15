@@ -1,25 +1,30 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react'
+import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom'
 
-function App() {
+// layouts
+
+import Admin from 'layouts/Admin.js'
+import Auth from './layouts/Auth.js'
+
+// views without layouts
+
+import Landing from 'views/Landing.js'
+import Profile from 'views/Profile.js'
+
+export default function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <BrowserRouter>
+      <Routes>
+        {/* add routes with layouts */}
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/auth/*" element={<Auth />} />
+        {/* add routes without layouts */}
+        <Route path="/landing" element={<Landing />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/" element={<Landing />} />
+        {/* add redirect for first page */}
+        <Route path="*" element={<Navigate to="/auth" replace={true} />} />
+      </Routes>
+    </BrowserRouter>
+  )
 }
-
-export default App;
