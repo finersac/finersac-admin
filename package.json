@@ -23,9 +23,11 @@
     "gulp": "^4.0.2",
     "gulp-append-prepend": "^1.0.9",
     "i18next": "^21.8.10",
+    "loadash": "^1.0.0",
     "logger": "^0.0.1",
     "lottie-react": "^2.3.1",
     "postcss": "^8.4.14",
+    "primeflex": "^3.2.1",
     "primeicons": "^5.0.0",
     "primereact": "^8.1.1",
     "react": "^18.2.0",
@@ -76,5 +78,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.182"
   }
 }

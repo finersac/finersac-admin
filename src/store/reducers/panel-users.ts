@@ -23,7 +23,7 @@ function panelUsersReducer(state = INITIAL_STATE, action: any) {
     case REMOVE_ALL:
       return INITIAL_STATE;
     default:
-      return INITIAL_STATE;
+      return state;
   }
 }
 

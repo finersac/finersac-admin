@@ -1,71 +1,83 @@
-import React, { FC, useState, useEffect, useRef, ReactElement } from "react";
-import { classNames } from "primereact/utils";
+import React, { FC, useState, useEffect, useRef } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-// import { ProductService } from "../service/ProductService";
 import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
-import { FileUpload } from "primereact/fileupload";
-import { Rating } from "primereact/rating";
-import { Toolbar } from "primereact/toolbar";
-import { InputTextarea } from "primereact/inputtextarea";
-import { RadioButton } from "primereact/radiobutton";
-import { InputNumber } from "primereact/inputnumber";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
-import "./DataTable.css";
+
 import { IDataTable } from "../../models/dataTable";
 import { WithTranslation, withTranslation } from "react-i18next";
+import useWindowDimensions from "../../utils/hooks/useWindowDimensions";
 
 interface DataTableProps extends WithTranslation {
   list: any[];
   title?: string;
-  textButtonSave?: string;
+  textButtonCreate?: string;
   textButtonCancel?: string;
-  onSave?: (item: any, isUpdate?: boolean) => void;
-  onDelete?: (item: any | []) => void;
+  onSave?: (item: any, isUpdate?: boolean) => Promise<void>;
+  onClose?: () => void;
+  onDelete?: (item: any | []) => Promise<void>;
+  onChangeItemSelected?: (item: any) => void;
   columnTable: IDataTable[];
-  AddOrEditComponent?: React.FC<{ item: any }>;
+  AddOrEditComponent?: React.FC<{
+    item: any;
+    onChangeItem: (key: string, value: any) => void;
+  }>;
+  formSuccess?: boolean;
 }
 
 const DataTableComponent: FC<DataTableProps> = ({
   t,
   list,
   title,
+  textButtonCreate,
   columnTable,
+  formSuccess,
   onSave,
+  onClose,
   onDelete,
+  onChangeItemSelected,
   AddOrEditComponent,
 }) => {
-  const emptyProduct = {};
-
+  const { height } = useWindowDimensions();
   const [localList, setLocalList] = useState<any[]>([]);
   const [isUpdate, setIsUpdate] = useState<boolean>(false);
   const [addDialog, setAddDialog] = useState<boolean>(false);
   const [deleteDialog, setDeleteDialog] = useState<boolean>(false);
   const [deleteMoreDialog, setDeleteMoreDialog] = useState<boolean>(false);
 
-  const [item, setItem] = useState(emptyProduct);
+  const [item, setItem] = useState<any | null>(null);
   const [selectedItems, setSelectedItems] = useState<any[] | null>(null);
-  const [submitted, setSubmitted] = useState(false);
   const [globalFilter, setGlobalFilter] = useState<string | null>(null);
   const toast = useRef<Toast | null>(null);
   const dt = useRef(null);
+
+  useEffect(() => {
+    if (!addDialog) {
+      return;
+    }
+    if (!formSuccess) {
+      return;
+    }
+    setAddDialog(false);
+    setItem(null);
+  }, [formSuccess, addDialog]);
 
   useEffect(() => {
     setLocalList(list);
   }, [list]);
 
   const openNew = () => {
-    setItem(emptyProduct);
+    setItem(null);
     setAddDialog(true);
     setIsUpdate(false);
   };
 
   const hideDialog = () => {
-    setSubmitted(false);
     setAddDialog(false);
     setIsUpdate(false);
+    onClose?.();
   };
 
   const hideDeleteProductDialog = () => {
@@ -76,37 +88,13 @@ const DataTableComponent: FC<DataTableProps> = ({
     setDeleteMoreDialog(false);
   };
 
-  const saveProduct = () => {
-    setSubmitted(true);
-
-    /*if (product.name.trim()) {
-      const _localList = [...localList];
-      const _product = { ...product };
-      if (product.id) {
-        const index = findIndexById(product.id);
-
-        _localList[index] = _product;
-        toast.current.show({
-          severity: "success",
-          summary: "Successful",
-          detail: "Product Updated",
-          life: 3000,
-        });
-      } else {
-        _product.id = createId();
-        _localList.push(_product);
-        toast.current.show({
-          severity: "success",
-          summary: "Successful",
-          detail: "Product Created",
-          life: 3000,
-        });
-      }
-
-      setLocalList(_products);
-      setProductDialog(false);
-      setProduct(emptyProduct);
-    }*/
+  const saveProduct = async () => {
+    if (!onSave) {
+      return;
+    }
+    try {
+      await onSave(item, isUpdate);
+    } catch (e) {}
   };
 
   const editProduct = (_item: any) => {
@@ -120,67 +108,66 @@ const DataTableComponent: FC<DataTableProps> = ({
     setDeleteDialog(true);
   };
 
-  const deleteProduct = () => {
-    /*let _products = products.filter((val) => val.id !== product.id);
-    setLocalList(_products);
-    setDeleteProductDialog(false);
-    setProduct(emptyProduct);*/
-    toast.current?.show({
-      severity: "success",
-      summary: "Successful",
-      detail: "Product Deleted",
-      life: 3000,
-    });
-  };
-
-  const findIndexById = (id: any) => {
-    /*let index = -1;
-    for (let i = 0; i < products.length; i++) {
-      if (products[i].id === id) {
-        index = i;
-        break;
-      }
+  const deleteProduct = async () => {
+    if (!item) {
+      return;
     }
-
-    return index;*/
+    await onDelete?.(item);
+    try {
+      hideDeleteProductDialog();
+    } catch (e) {}
   };
 
   const confirmDeleteSelected = () => {
     setDeleteMoreDialog(true);
   };
 
-  const deleteSelectedProducts = () => {
-    if (!selectedItems) {
+  const deleteSelectedProducts = async () => {
+    if (!item) {
       return;
     }
-    let _products = localList.filter((val) => !selectedItems.includes(val));
-    setLocalList(_products);
-    setDeleteMoreDialog(false);
-    setSelectedItems(null);
-    toast.current?.show({
-      severity: "success",
-      summary: "Successful",
-      detail: "Products Deleted",
-      life: 3000,
-    });
+    await onDelete?.(item);
+    try {
+      const _items = localList.filter((val) => !item.includes(val));
+      setLocalList(_items);
+      setDeleteMoreDialog(false);
+      setSelectedItems(null);
+    } catch (e) {}
   };
 
-  const leftToolbarTemplate = () => {
+  const onChangeLocalItem = (key: string, value: any) => {
+    let _item = { ...item };
+    _item[key] = value;
+    setItem(_item);
+  };
+
+  const ToolbarTemplate = () => {
     return (
       <React.Fragment>
-        <Button
-          label="New"
-          icon="pi pi-plus"
-          className="p-button-success mr-2"
-          onClick={openNew}
-        />
-        <Button
-          label="Delete"
-          icon="pi pi-trash"
-          className="p-button-danger"
-          onClick={confirmDeleteSelected}
-          disabled={!selectedItems}
-        />
+        <div className="flex flex-row flex-wrap justify-content-between">
+          <div className="flex justify-content-center align-items-center">
+            <h1 className=" text-primary2 text-center font-semibold text-3xl">
+              Usuarios
+            </h1>
+          </div>
+          <div className="flex">
+            <Button
+              label={textButtonCreate ? textButtonCreate : t("button.create")}
+              icon="pi pi-plus"
+              className="bg-secondary mr-2"
+              onClick={openNew}
+            />
+            {selectedItems && (
+              <Button
+                label={t("button.delete")}
+                icon="pi pi-trash"
+                className=""
+                onClick={confirmDeleteSelected}
+                disabled={!selectedItems}
+              />
+            )}
+          </div>
+        </div>
       </React.Fragment>
     );
   };
@@ -210,7 +197,7 @@ const DataTableComponent: FC<DataTableProps> = ({
         <InputText
           type="search"
           onInput={(e) => setGlobalFilter(e.currentTarget?.value || "")}
-          placeholder="Search..."
+          placeholder={`${t("common.search")}`}
         />
       </span>
     </div>
@@ -218,13 +205,13 @@ const DataTableComponent: FC<DataTableProps> = ({
   const productDialogFooter = (
     <React.Fragment>
       <Button
-        label="Cancel"
+        label={t(`button.cancel`)}
         icon="pi pi-times"
         className="p-button-text"
         onClick={hideDialog}
       />
       <Button
-        label="Save"
+        label={t(`button.${isUpdate ? "update" : "create"}`)}
         icon="pi pi-check"
         className="p-button-text"
         onClick={saveProduct}
@@ -234,13 +221,13 @@ const DataTableComponent: FC<DataTableProps> = ({
   const deleteProductDialogFooter = (
     <React.Fragment>
       <Button
-        label="No"
+        label={t("button.no")}
         icon="pi pi-times"
         className="p-button-text"
         onClick={hideDeleteProductDialog}
       />
       <Button
-        label="Yes"
+        label={t("button.yes")}
         icon="pi pi-check"
         className="p-button-text"
         onClick={deleteProduct}
@@ -250,13 +237,13 @@ const DataTableComponent: FC<DataTableProps> = ({
   const deleteProductsDialogFooter = (
     <React.Fragment>
       <Button
-        label="No"
+        label={t("button.no")}
         icon="pi pi-times"
         className="p-button-text"
         onClick={hideDeleteProductsDialog}
       />
       <Button
-        label="Yes"
+        label={t("button.yes")}
         icon="pi pi-check"
         className="p-button-text"
         onClick={deleteSelectedProducts}
@@ -268,60 +255,64 @@ const DataTableComponent: FC<DataTableProps> = ({
     <div className="">
       <Toast ref={toast} />
 
-      <div className="card">
-        <Toolbar
-          className="mb-4"
-          left={leftToolbarTemplate}
-          // right={rightToolbarTemplate}
-        ></Toolbar>
-
-        <DataTable
-          ref={dt}
-          value={localList}
-          selection={selectedItems}
-          onSelectionChange={(e) => setSelectedItems(e.value)}
-          dataKey="id"
-          paginator
-          rows={10}
-          rowsPerPageOptions={[5, 10, 25]}
-          paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-          globalFilter={globalFilter}
-          header={header}
-          responsiveLayout="scroll"
-        >
-          {columnTable.map((column, index) => {
-            return (
-              <Column
-                {...column}
-                key={index}
-                header={t(String(column.header))}
-              />
-            );
-          })}
-          <Column
-            body={actionBodyTemplate}
-            exportable={false}
-            style={{ minWidth: "8rem" }}
-          ></Column>
-        </DataTable>
+      <div>
+        <div className="bg-white rounded mb-4 py-3 justify-content-center shadow-md radius pr-3 pl-7">
+          <ToolbarTemplate />
+        </div>
+        <div className="h-400-px">
+          <DataTable
+            ref={dt}
+            value={localList}
+            selection={selectedItems}
+            onSelectionChange={(e) => setSelectedItems(e.value)}
+            dataKey="id"
+            paginator
+            rows={10}
+            scrollable
+            scrollHeight={`${Number(height) * 0.5}px`}
+            rowsPerPageOptions={[5, 10, 25]}
+            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+            globalFilter={globalFilter}
+            header={header}
+            responsiveLayout="scroll"
+            emptyMessage={`${t("common.emptyList")}`}
+          >
+            {columnTable.map((column, index) => {
+              return (
+                <Column
+                  {...column}
+                  key={index}
+                  header={t(String(column.header))}
+                />
+              );
+            })}
+            <Column
+              body={actionBodyTemplate}
+              exportable={false}
+              style={{ minWidth: "8rem" }}
+            ></Column>
+          </DataTable>
+        </div>
       </div>
 
       <Dialog
         visible={addDialog}
-        style={{ width: "450px" }}
         header=""
+        style={{ width: "600px" }}
         modal
         className="p-fluid"
         footer={productDialogFooter}
         onHide={hideDialog}
       >
-        {AddOrEditComponent && <AddOrEditComponent item={item} />}
+        {AddOrEditComponent && (
+          <AddOrEditComponent item={item} onChangeItem={onChangeLocalItem} />
+        )}
       </Dialog>
 
       <Dialog
         visible={deleteDialog}
         style={{ width: "450px" }}
-        header="Confirm"
+        header={t("common.confirm")}
         modal
         footer={deleteProductDialogFooter}
         onHide={hideDeleteProductDialog}
@@ -332,7 +323,7 @@ const DataTableComponent: FC<DataTableProps> = ({
             style={{ fontSize: "2rem" }}
           />
 
-          <span>Are you sure you want to delete?</span>
+          <span>{t("common.sureDelete")}</span>
         </div>
       </Dialog>
 
@@ -350,7 +341,7 @@ const DataTableComponent: FC<DataTableProps> = ({
             style={{ fontSize: "2rem" }}
           />
 
-          <span>Are you sure you want to delete the selected products?</span>
+          <span>{t("common.sureDeleteItems")}</span>
         </div>
       </Dialog>
     </div>

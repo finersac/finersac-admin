@@ -19,3 +19,10 @@ export const SET_ALERT = "SET_ALERT";
 
 export const SET_PANEL_USERS = "SET_PANEL_USERS";
 export const REMOVE_PANEL_USERS = "REMOVE_PANEL_USERS";
+
+/**
+ * SET COACHES
+ */
+
+export const SET_COACHES = "SET_COACHES";
+export const REMOVE_COACHES = "REMOVE_COACHES";

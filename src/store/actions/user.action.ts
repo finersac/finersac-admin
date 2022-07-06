@@ -1,6 +1,10 @@
 // redux/actions.js
-import { setStore } from "../../utils/functions";
-import { REMOVE_USER, SET_USER } from "../../utils/constants/reducers";
+import { getRole, setStore } from "../../utils/functions";
+import {
+  REMOVE_ALL,
+  REMOVE_USER,
+  SET_USER,
+} from "../../utils/constants/reducers";
 import { AnyAction } from "@reduxjs/toolkit";
 import { ThunkAction, ThunkDispatch } from "redux-thunk";
 import API from "../../api/services";
@@ -11,6 +15,7 @@ import {
   resetPassword,
 } from "../../services/user-service";
 import { setAlertAction } from "./alert.action";
+import { IUser } from "../../models/user";
 
 export const logInAction = (
   email: string,
@@ -27,7 +32,11 @@ export const logInAction = (
       }
       API.setAuthorization(data.token);
 
-      dispatch(setStore(SET_USER, data.result.user));
+      let user: IUser = data.result.user;
+
+      user.role = getRole(user.id_role || 1);
+
+      dispatch(setStore(SET_USER, user));
     } catch (e: any) {
       const codeError = `error.${e.response?.data?.codeError || "generic"}`;
       dispatch(
@@ -82,6 +91,21 @@ export const resetPasswordAction = (
         password,
       });
       dispatch(setStore(REMOVE_USER, false));
+    } catch (e: any) {
+      throw e;
+    }
+  };
+};
+
+export const logOutAction = (): ThunkAction<
+  Promise<void>,
+  {},
+  {},
+  AnyAction
+> => {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>): Promise<void> => {
+    try {
+      dispatch(setStore(REMOVE_ALL, false));
     } catch (e: any) {
       throw e;
     }
