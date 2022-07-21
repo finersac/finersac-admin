@@ -1,24 +1,28 @@
 import React, { FC, useState, useEffect, useRef } from "react";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
+import { ReduceName } from "../../store/reducers";
 import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
-import { InputText } from "primereact/inputtext";
+import { TabView, TabPanel, TabViewTabChangeParams } from "primereact/tabview";
 
-import { IDataTable } from "../../models/dataTable";
+import { IDataTable, ITabView } from "../../models/dataTable";
 import { WithTranslation, withTranslation } from "react-i18next";
-import useWindowDimensions from "../../utils/hooks/useWindowDimensions";
+import Table from "./Table";
 
 interface DataTableProps extends WithTranslation {
-  list: any[];
+  reduceName?: ReduceName;
   title?: string;
+  toolBarTitle?: string;
   textButtonCreate?: string;
   textButtonCancel?: string;
+  tabViews?: ITabView[];
+  exportExcelFields?: string[];
+  onTabChange?: (index: number) => void;
   onSave?: (item: any, isUpdate?: boolean) => Promise<void>;
   onClose?: () => void;
   onDelete?: (item: any | []) => Promise<void>;
-  onChangeItemSelected?: (item: any) => void;
+  onBlock?: (item: any | []) => Promise<void>;
+  onUploadExcel?: (item: any) => void;
   columnTable: IDataTable[];
   AddOrEditComponent?: React.FC<{
     item: any;
@@ -29,44 +33,43 @@ interface DataTableProps extends WithTranslation {
 
 const DataTableComponent: FC<DataTableProps> = ({
   t,
-  list,
+  reduceName,
+  tabViews,
   title,
+  toolBarTitle,
   textButtonCreate,
   columnTable,
   formSuccess,
+  exportExcelFields,
+  onTabChange,
   onSave,
   onClose,
   onDelete,
-  onChangeItemSelected,
+  onBlock,
+  onUploadExcel,
   AddOrEditComponent,
 }) => {
-  const { height } = useWindowDimensions();
-  const [localList, setLocalList] = useState<any[]>([]);
   const [isUpdate, setIsUpdate] = useState<boolean>(false);
   const [addDialog, setAddDialog] = useState<boolean>(false);
   const [deleteDialog, setDeleteDialog] = useState<boolean>(false);
+  const [blockUnlockDialog, setBlockUnlockDialog] = useState<boolean>(false);
   const [deleteMoreDialog, setDeleteMoreDialog] = useState<boolean>(false);
+
+  const [tabPosition, setTabPosition] = useState<number>(0);
 
   const [item, setItem] = useState<any | null>(null);
   const [selectedItems, setSelectedItems] = useState<any[] | null>(null);
-  const [globalFilter, setGlobalFilter] = useState<string | null>(null);
   const toast = useRef<Toast | null>(null);
-  const dt = useRef(null);
 
   useEffect(() => {
-    if (!addDialog) {
-      return;
+    if (addDialog && formSuccess) {
+      setAddDialog(false);
+      setDeleteDialog(false);
+      setDeleteMoreDialog(false);
+      setItem(null);
+      onClose?.();
     }
-    if (!formSuccess) {
-      return;
-    }
-    setAddDialog(false);
-    setItem(null);
-  }, [formSuccess, addDialog]);
-
-  useEffect(() => {
-    setLocalList(list);
-  }, [list]);
+  }, [formSuccess, addDialog, onClose]);
 
   const openNew = () => {
     setItem(null);
@@ -82,6 +85,10 @@ const DataTableComponent: FC<DataTableProps> = ({
 
   const hideDeleteProductDialog = () => {
     setDeleteDialog(false);
+  };
+
+  const hideBlockUnlockDialog = () => {
+    setBlockUnlockDialog(false);
   };
 
   const hideDeleteProductsDialog = () => {
@@ -103,16 +110,33 @@ const DataTableComponent: FC<DataTableProps> = ({
     setIsUpdate(true);
   };
 
+  const confirmBlockUnlockItem = (_item: any) => {
+    setItem({ ..._item });
+    setBlockUnlockDialog(true);
+  };
+
   const confirmDeleteProduct = (_item: any) => {
     setItem({ ..._item });
     setDeleteDialog(true);
   };
 
-  const deleteProduct = async () => {
+  const blockUnlockItem = async () => {
+    if (!item) {
+      return;
+    }
+    await onBlock?.(item);
+    try {
+      hideBlockUnlockDialog();
+      onClose?.();
+    } catch (e) {}
+  };
+
+  const deleteItem = async () => {
     if (!item) {
       return;
     }
     await onDelete?.(item);
+    onClose?.();
     try {
       hideDeleteProductDialog();
     } catch (e) {}
@@ -128,8 +152,8 @@ const DataTableComponent: FC<DataTableProps> = ({
     }
     await onDelete?.(item);
     try {
-      const _items = localList.filter((val) => !item.includes(val));
-      setLocalList(_items);
+      //const _items = localList.filter((val) => !item.includes(val));
+      //setLocalList(_items);
       setDeleteMoreDialog(false);
       setSelectedItems(null);
     } catch (e) {}
@@ -147,7 +171,7 @@ const DataTableComponent: FC<DataTableProps> = ({
         <div className="flex flex-row flex-wrap justify-content-between">
           <div className="flex justify-content-center align-items-center">
             <h1 className=" text-primary2 text-center font-semibold text-3xl">
-              Usuarios
+              {toolBarTitle}
             </h1>
           </div>
           <div className="flex">
@@ -172,36 +196,6 @@ const DataTableComponent: FC<DataTableProps> = ({
     );
   };
 
-  const actionBodyTemplate = (rowData: any) => {
-    return (
-      <React.Fragment>
-        <Button
-          icon="pi pi-pencil"
-          className="p-button-rounded p-button-success mr-2"
-          onClick={() => editProduct(rowData)}
-        />
-        <Button
-          icon="pi pi-trash"
-          className="p-button-rounded p-button-warning"
-          onClick={() => confirmDeleteProduct(rowData)}
-        />
-      </React.Fragment>
-    );
-  };
-
-  const header = (
-    <div className="table-header">
-      <h5 className="mx-0 my-1">{title}</h5>
-      <span className="p-input-icon-left">
-        <i className="pi pi-search" />
-        <InputText
-          type="search"
-          onInput={(e) => setGlobalFilter(e.currentTarget?.value || "")}
-          placeholder={`${t("common.search")}`}
-        />
-      </span>
-    </div>
-  );
   const productDialogFooter = (
     <React.Fragment>
       <Button
@@ -218,19 +212,21 @@ const DataTableComponent: FC<DataTableProps> = ({
       />
     </React.Fragment>
   );
-  const deleteProductDialogFooter = (
+  const confirmDialogFooter = (
     <React.Fragment>
       <Button
         label={t("button.no")}
         icon="pi pi-times"
         className="p-button-text"
-        onClick={hideDeleteProductDialog}
+        onClick={
+          blockUnlockDialog ? hideBlockUnlockDialog : hideDeleteProductDialog
+        }
       />
       <Button
         label={t("button.yes")}
         icon="pi pi-check"
         className="p-button-text"
-        onClick={deleteProduct}
+        onClick={blockUnlockDialog ? blockUnlockItem : deleteItem}
       />
     </React.Fragment>
   );
@@ -251,6 +247,11 @@ const DataTableComponent: FC<DataTableProps> = ({
     </React.Fragment>
   );
 
+  const handleOnTabChange = (tab: TabViewTabChangeParams) => {
+    setTabPosition(tab.index);
+    onTabChange?.(tab.index);
+  };
+
   return (
     <div className="">
       <Toast ref={toast} />
@@ -260,38 +261,35 @@ const DataTableComponent: FC<DataTableProps> = ({
           <ToolbarTemplate />
         </div>
         <div className="h-400-px">
-          <DataTable
-            ref={dt}
-            value={localList}
-            selection={selectedItems}
-            onSelectionChange={(e) => setSelectedItems(e.value)}
-            dataKey="id"
-            paginator
-            rows={10}
-            scrollable
-            scrollHeight={`${Number(height) * 0.5}px`}
-            rowsPerPageOptions={[5, 10, 25]}
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-            globalFilter={globalFilter}
-            header={header}
-            responsiveLayout="scroll"
-            emptyMessage={`${t("common.emptyList")}`}
-          >
-            {columnTable.map((column, index) => {
-              return (
-                <Column
-                  {...column}
-                  key={index}
-                  header={t(String(column.header))}
-                />
-              );
-            })}
-            <Column
-              body={actionBodyTemplate}
-              exportable={false}
-              style={{ minWidth: "8rem" }}
-            ></Column>
-          </DataTable>
+          {tabViews?.length ? (
+            <TabView activeIndex={tabPosition} onTabChange={handleOnTabChange}>
+              {tabViews.map((tab, key) => (
+                <TabPanel header={tab.title} key={key}>
+                  <Table
+                    reduceName={tab.reduceName}
+                    title={title}
+                    columnTable={columnTable}
+                    exportExcelFields={exportExcelFields}
+                    onUploadExcel={onUploadExcel}
+                    onDelete={confirmDeleteProduct}
+                    onEdit={editProduct}
+                    isTab
+                  />
+                </TabPanel>
+              ))}
+            </TabView>
+          ) : (
+            <Table
+              reduceName={reduceName || "panelUsers"}
+              title={title}
+              columnTable={columnTable}
+              exportExcelFields={exportExcelFields}
+              onUploadExcel={onUploadExcel}
+              onBlock={confirmBlockUnlockItem}
+              onDelete={confirmDeleteProduct}
+              onEdit={editProduct}
+            />
+          )}
         </div>
       </div>
 
@@ -314,7 +312,7 @@ const DataTableComponent: FC<DataTableProps> = ({
         style={{ width: "450px" }}
         header={t("common.confirm")}
         modal
-        footer={deleteProductDialogFooter}
+        footer={confirmDialogFooter}
         onHide={hideDeleteProductDialog}
       >
         <div className="confirmation-content">
@@ -324,6 +322,44 @@ const DataTableComponent: FC<DataTableProps> = ({
           />
 
           <span>{t("common.sureDelete")}</span>
+        </div>
+      </Dialog>
+
+      <Dialog
+        visible={deleteDialog}
+        style={{ width: "450px" }}
+        header={t("common.confirm")}
+        modal
+        footer={confirmDialogFooter}
+        onHide={hideDeleteProductDialog}
+      >
+        <div className="confirmation-content">
+          <i
+            className="pi pi-exclamation-triangle mr-3"
+            style={{ fontSize: "2rem" }}
+          />
+
+          <span>{t("common.sureDelete")}</span>
+        </div>
+      </Dialog>
+
+      <Dialog
+        visible={blockUnlockDialog}
+        style={{ width: "450px" }}
+        header={t("common.confirm")}
+        modal
+        footer={confirmDialogFooter}
+        onHide={hideDeleteProductDialog}
+      >
+        <div className="confirmation-content">
+          <i
+            className="pi pi-exclamation-triangle mr-3"
+            style={{ fontSize: "2rem" }}
+          />
+
+          <span>
+            {t(`common.${item?.blocked ? "sureUnlock" : "sureBlock"}`)}
+          </span>
         </div>
       </Dialog>
 

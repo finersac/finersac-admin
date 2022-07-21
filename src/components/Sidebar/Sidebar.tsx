@@ -1,6 +1,6 @@
 /*eslint-disable*/
-import React, { ChangeEvent, FC, memo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { ChangeEvent, FC, memo, useEffect } from "react";
+import { Link, useLocation, useNavigate, useRoutes } from "react-router-dom";
 import { WithTranslation, withTranslation } from "react-i18next";
 
 import { logOutAction as typeLogOutAction } from "../../store/actions/user.action";
@@ -25,18 +25,22 @@ const Sidebar: FC<SidebarProps> = ({ t, logOutAction, user }) => {
   const [tabSelected, setTabSelected] =
     React.useState<string>("/admin/dashboard");
 
-  let navigate = useNavigate();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setTabSelected(location.pathname);
+  }, [location]);
 
   const ButtonSideBar: FC<ButtonSideBarProps> = ({
     label,
     navigateTo,
     iconName,
   }) => {
-    const onPress = (event: any) => {
+    const onPress = async (event: any) => {
       event?.preventDefault();
 
-      navigateTo === "/auth" && logOutAction();
-      setTabSelected(navigateTo);
+      navigateTo === "/auth" && (await logOutAction());
       navigate(navigateTo);
     };
     return (

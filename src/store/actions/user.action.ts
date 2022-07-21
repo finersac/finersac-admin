@@ -1,5 +1,9 @@
 // redux/actions.js
-import { getRole, setStore } from "../../utils/functions";
+import {
+  getRole,
+  normalizeCatchActions,
+  setStore,
+} from "../../utils/functions";
 import {
   REMOVE_ALL,
   REMOVE_USER,
@@ -38,14 +42,7 @@ export const logInAction = (
 
       dispatch(setStore(SET_USER, user));
     } catch (e: any) {
-      const codeError = `error.${e.response?.data?.codeError || "generic"}`;
-      dispatch(
-        setAlertAction({
-          visible: true,
-          type: "error",
-          description: codeError,
-        })
-      );
+      normalizeCatchActions(dispatch, e.response?.data?.codeError);
       throw e;
     }
   };
@@ -69,14 +66,7 @@ export const forgotPasswordAction = (
         })
       );
     } catch (e: any) {
-      const codeError = `error.${e.response?.data?.codeError || "generic"}`;
-      dispatch(
-        setAlertAction({
-          visible: true,
-          type: "error",
-          description: codeError,
-        })
-      );
+      normalizeCatchActions(dispatch, e.response?.data?.codeError);
       throw e;
     }
   };
@@ -92,6 +82,7 @@ export const resetPasswordAction = (
       });
       dispatch(setStore(REMOVE_USER, false));
     } catch (e: any) {
+      normalizeCatchActions(dispatch, e.response?.data?.codeError);
       throw e;
     }
   };
@@ -107,6 +98,7 @@ export const logOutAction = (): ThunkAction<
     try {
       dispatch(setStore(REMOVE_ALL, false));
     } catch (e: any) {
+      normalizeCatchActions(dispatch, e.response?.data?.codeError);
       throw e;
     }
   };

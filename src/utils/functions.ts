@@ -2,9 +2,13 @@ import { UserRole } from "../models/user";
 import { IDataTable } from "../models/dataTable";
 import i18n from "../i18n";
 import _ from "lodash";
+import { AnyAction } from "redux";
+import { ThunkDispatch } from "redux-thunk";
+import { REMOVE_USER } from "./constants/reducers";
+import { setAlertAction } from "../store/actions/alert.action";
 
-export const setStore = (ACCION: string, data: any) => {
-  return { type: ACCION, payload: data };
+export const setStore = (Action: string, data: any) => {
+  return { type: Action, payload: data };
 };
 
 const roleBodyTemplate = (rowData: any) => {
@@ -34,4 +38,20 @@ export const getRole = (idRole: number): UserRole => {
     default:
       return "athlete";
   }
+};
+
+export const normalizeCatchActions = (
+  dispatch: ThunkDispatch<{}, {}, AnyAction>,
+  codeError?: string
+) => {
+  codeError === "token_expired" && dispatch(setStore(REMOVE_USER, false));
+
+  const translateError = `error.${codeError || "generic"}`;
+  dispatch(
+    setAlertAction({
+      visible: true,
+      type: "error",
+      description: translateError,
+    })
+  );
 };

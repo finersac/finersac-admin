@@ -3,9 +3,11 @@ const locale = {
     error: {
       generic: "There was an error, please try again",
       auth_error: "Wrong email or password",
+      token_expired: "Session expired, please log in again",
       email_required: "Email is required",
       password_required: "Password is required",
       repassword_required: "Password confirmation is required",
+      coaches_required: "Coach selection is required",
       password_not_match: "The confirmation does not match the password.",
       first_name_required: "First name is required",
       last_name_required: "Last name is required",
@@ -16,6 +18,7 @@ const locale = {
       failed_to_update_user: "There was an error updating the user",
       passwordExpired:
         "The time to change your password has expired, request to change your password again",
+      model_is_not_same: "The excel model does not match the one requested",
     },
     success: {
       emailSend: "An email was sent to retrieve your password",
@@ -24,8 +27,11 @@ const locale = {
       user_created: "User was successfully created",
       user_updated: "User was successfully updated",
       user_deleted: "Deleted user successfully",
-      user_blocked: 'The user was successfully blocked',
-      user_unlocked: 'The user was successfully unlocked'
+      user_blocked: "The user was successfully blocked",
+      user_unlocked: "The user was successfully unlocked",
+      exercise_created: "Exercise created",
+      exercises_created: "Exercises created",
+      exercise_updated: "Exercise updated",
     },
     info: {},
     common: {
@@ -46,6 +52,8 @@ const locale = {
       athlete: "Athlete",
       emptyResult: "No results found",
       emptyList: "No results found",
+      sureBlock: "Are you sure to block the user?",
+      sureUnlock: "Are you sure you want to unblock the user?",
     },
     sideBar: {
       dashboard: "Dashboard",
@@ -69,6 +77,10 @@ const locale = {
       coaches: "Coaches",
       selectCoach: "Select a coach",
       emptyCoaches: "There are no trainers available",
+
+      verified_exercises: "Verified Exercises",
+      unverified_exercises: "Unverified Exercises",
+      verified_exercise: "Verified exercise",
     },
     button: {
       save: "Save",
@@ -77,8 +89,11 @@ const locale = {
       delete: "Delete",
       cancel: "Cancel",
       createUser: "Create User",
+      createExercise: "Create Exercise",
       no: "No",
       yes: "Yes",
+      downloadModel: "Download Model",
+      import: "Import",
     },
     role: {
       superadmin: "super admin",

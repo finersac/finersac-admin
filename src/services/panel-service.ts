@@ -18,3 +18,27 @@ export const updatePanelUserServices = async (data: any) => {
 export const getCoachesServices = async () => {
   return API.get(`/${VERSION}/panel/coaches`);
 };
+
+//GET PANEL EXERCISE
+export const getPanelVerifiedExercisesServices = async () => {
+  return API.get(`/${VERSION}/panel/verified-exercises`);
+};
+
+export const getPanelUnverifiedExercisesServices = async () => {
+  return API.get(`/${VERSION}/panel/unverified-exercises`);
+};
+
+//CREATE PANEL EXERCISE
+export const createPanelExerciseServices = async (data: any) => {
+  return API.post(`/${VERSION}/panel/create-exercise`, data);
+};
+
+//UPDATE PANEL EXERCISE
+export const updatePanelExerciseServices = async (data: any) => {
+  return API.post(`/${VERSION}/panel/update-exercise`, data);
+};
+
+//UPLOAD PANEL EXERCISE
+export const uploadPanelExerciseServices = async (data: any) => {
+  return API.post(`/${VERSION}/panel/upload-exercises`, data);
+};

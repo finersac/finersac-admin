@@ -11,8 +11,10 @@ import FooterAdmin from "../components/Footers/FooterAdmin";
 // views
 
 import Dashboard from "../views/admin/Dashboard";
+
 import Users from "../views/admin/Users";
-import Maps from "../views/admin/Maps";
+import Exercises from "../views/admin/Exercises";
+
 import Settings from "../views/admin/Settings";
 import Tables from "../views/admin/Tables";
 
@@ -31,6 +33,7 @@ const Admin: FC<AdminProps> = (): ReactElement => {
             <Route index element={<Dashboard />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/users" element={<Users />} />
+            <Route path="/exercises" element={<Exercises />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/tables" element={<Tables />} />
             {/* Header

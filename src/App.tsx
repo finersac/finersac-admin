@@ -1,4 +1,4 @@
-import React, { ReactElement } from "react";
+import React, { ReactElement, useState } from "react";
 import { compose } from "redux";
 import { connect } from "react-redux";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
@@ -20,16 +20,18 @@ interface AppProps {
 }
 
 function App({ user }: AppProps): ReactElement {
-
   return (
     <BrowserRouter>
       <Routes>
         {/* add routes with layouts */}
         {/* <Route path="/admin/*" element={<Admin />} /> */}
-        <Route path="/admin/*" element={<Admin />} />
+        <Route
+          path="/admin/*"
+          element={!user ? <Navigate to="/auth" /> : <Admin />}
+        />
         <Route
           path="/auth/*"
-          element={user ? <Navigate to="/admin" /> : <Auth />}
+          element={user ? <Navigate to="/admin/dashboard" /> : <Auth />}
         />
         {/* add routes without layouts */}
         <Route path="/landing" element={<Landing />} />

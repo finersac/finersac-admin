@@ -14,7 +14,7 @@ import {
 } from "primereact/dropdown";
 
 import { WithTranslation, withTranslation } from "react-i18next";
-import { IUser } from "../../models/user";
+
 import { classNames } from "primereact/utils";
 
 interface DropdownCoachesProps extends WithTranslation, DropdownProps {
@@ -90,10 +90,10 @@ const DropdownCoaches: FC<DropdownCoachesProps> = (props) => {
         showClear
         filterBy="first_name,last_name,email"
         className={classNames({
-          "p-invalid": submitted && required && !coachSelected,
+          "p-invalid": submitted && required && !coachSelected && !value,
         })}
       />
-      {submitted && required && !coachSelected && (
+      {submitted && required && !coachSelected && !value && (
         <small className="p-error">{t(`error.${keyName}_required`)}</small>
       )}
     </>

@@ -20,6 +20,7 @@
     "autoprefixer": "^10.4.7",
     "axios": "^0.27.2",
     "chart.js": "^3.8.0",
+    "file-saver": "^2.0.5",
     "gulp": "^4.0.2",
     "gulp-append-prepend": "^1.0.9",
     "i18next": "^21.8.10",
@@ -42,7 +43,8 @@
     "redux-thunk": "^2.4.1",
     "tailwindcss": "^3.1.3",
     "typescript": "^4.7.4",
-    "web-vitals": "^2.1.0"
+    "web-vitals": "^2.1.0",
+    "xlsx": "^0.18.5"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -51,7 +53,7 @@
     "eject": "react-scripts eject",
     "install:clean": "rm -rf node_modules/ && rm -rf package-lock.json && npm install && npm run build:tailwind && npm start",
     "build:tailwind": "tailwind build src/assets/styles/index.css -o src/assets/styles/tailwind.css",
-    "env:dev": "sh set-enviroment.sh dev",
+    "env:qa": "sh set-enviroment.sh qa",
     "env:prod": "sh set-enviroment.sh prod",
     "env:local": "sh set-enviroment.sh local"
   },
@@ -80,6 +82,7 @@
     ]
   },
   "devDependencies": {
+    "@types/file-saver": "^2.0.5",
     "@types/lodash": "^4.14.182"
   }
 }

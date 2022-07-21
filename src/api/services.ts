@@ -19,9 +19,7 @@ class Api {
       console.log("-------------Response----------");
       return result.data;
     } catch (e: any) {
-      console.log(e);
-
-      return e.response?.status;
+      throw e;
     }
   }
 

@@ -2,10 +2,12 @@ const locale = {
   translation: {
     error: {
       generic: "Hubo un error, por favor intente de nuevo",
+      token_expired: "Sesión caducada, por favor inicie sesión de nuevo",
       auth_error: "Correo o contraseña incorrectos",
       email_required: "El email es requerido",
       repassword_required: "La confirmacion contraseña es requerida",
       password_not_match: "La confirmacion no coincide con la contraseña",
+      coaches_required: "La selección del coach es requerida",
       password_required: "La contraseña es requerida",
       first_name_required: "El nombre es requerido",
       last_name_required: "El apellido es requerido",
@@ -14,6 +16,7 @@ const locale = {
       user_already_exists: "El usuario existe",
       user_not_exist: "El usuario no existe",
       failed_to_update_user: "Hubo un error al actualizar el usuario",
+      model_is_not_same: "El modelo de excel no coincide con el solicitado",
       passwordExpired:
         "El tiempo para cambiar su contraseña ha expirado, solicite cambiar su contraseña nuevamente",
     },
@@ -27,6 +30,9 @@ const locale = {
       user_deleted: "Se eliminó al usuario con éxito",
       user_blocked: "El usuario fue bloqueado con éxito.",
       user_unlocked: "El usuario fue desbloqueado con éxito.",
+      exercise_created: "Ejercicio creado!",
+      exercises_created: "Ejericicios creados!",
+      exercise_updated: "Ejercicio actualizado!",
     },
     info: {},
     common: {
@@ -49,6 +55,8 @@ const locale = {
       athlete: "Atleta",
       emptyResult: "No se encontraron resultados",
       emptyList: "Sin resultados",
+      sureBlock: "¿Está seguro de bloquear al usuario?",
+      sureUnlock: "¿Está seguro de desbloquear al usuario?",
     },
     sideBar: {
       dashboard: "Panel Principal",
@@ -72,6 +80,11 @@ const locale = {
       coaches: "Entrenadores",
       selectCoach: "Selecciona un entrenador",
       emptyCoaches: "No hay entrenadores disponibles",
+      exercise_name: "Nombre del ejercicio",
+      video_url: "Url del video",
+      verified_exercises: "Ejercicios verificados",
+      unverified_exercises: "Ejercicios sin verificar",
+      verified_exercise: "Ejercicio verificado",
     },
     button: {
       save: "Guardar",
@@ -80,8 +93,11 @@ const locale = {
       delete: "Eliminar",
       cancel: "Cancelar",
       createUser: "Nuevo Usuario",
+      createExercise: "Nuevo Ejercicio",
       no: "No",
       yes: "Sí",
+      downloadModel: "Descargar Modelo",
+      import: "Importar",
     },
     role: {
       superadmin: "super admin",

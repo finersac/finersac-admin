@@ -29,7 +29,6 @@ interface UsersProps extends WithTranslation {
   blockUnlockPanelUserAction: typeof typeBlockUnlockPanelUserAction;
   deletePanelUserAction: typeof typeDeletePanelUserAction;
   coachesAction: typeof typeCoachesAction;
-  panelUsers: IUser[];
   user: IUser;
 }
 
@@ -46,7 +45,6 @@ const userFields = [
 const Users: FC<UsersProps> = ({
   t,
   user,
-  panelUsers,
   panelUsersAction,
   createPanelUserAction,
   updatePanelUserAction,
@@ -109,7 +107,7 @@ const Users: FC<UsersProps> = ({
 
     try {
       await (isUpdate ? updatePanelUserAction : createPanelUserAction)(
-        newData,
+        { ...newData, blocked: isUpdate ? data?.blocked : 0 },
         data?.id
       );
       setFormSuccess(true);
@@ -121,6 +119,16 @@ const Users: FC<UsersProps> = ({
   const handleOnDelete = async (user: any) => {
     try {
       await deletePanelUserAction(user.id);
+      setSubmitted(false);
+      setFormSuccess(true);
+    } catch (e) {}
+  };
+
+  const handleOnBlock = async (user: any) => {
+    try {
+      await blockUnlockPanelUserAction(user.id, user?.blocked === 1 ? 0 : 1);
+      setSubmitted(false);
+      setFormSuccess(true);
     } catch (e) {}
   };
 
@@ -269,6 +277,7 @@ const Users: FC<UsersProps> = ({
 
   const onCloseModal = () => {
     setSubmitted(false);
+    setFormSuccess(false);
   };
 
   return (
@@ -276,7 +285,8 @@ const Users: FC<UsersProps> = ({
       <div className="h-full bg-blueGray-100">
         <div className="w-full px-12">
           <DataTable
-            list={panelUsers}
+            reduceName="panelUsers"
+            toolBarTitle={t("sideBar.users")}
             columnTable={columnTable}
             onSave={handleOnSave}
             onDelete={handleOnDelete}
@@ -284,6 +294,7 @@ const Users: FC<UsersProps> = ({
             AddOrEditComponent={component}
             formSuccess={formSuccess}
             onClose={onCloseModal}
+            onBlock={handleOnBlock}
           />
         </div>
       </div>

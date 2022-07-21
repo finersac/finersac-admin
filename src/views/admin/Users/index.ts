@@ -27,7 +27,6 @@ function mapDispatchToProps(dispatch: any) {
 }
 
 const mapStateToProps = (state: ReduceProp) => ({
-  panelUsers: state.panelUsers,
   user: state.user,
 });
 
