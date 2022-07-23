@@ -16,8 +16,8 @@ interface LoginProps extends WithTranslation {
 }
 
 const Login: FC<LoginProps> = ({ logInAction, t }): ReactElement => {
-  const [email, setEmail] = useState<string>("egarcia@finersac.com");
-  const [password, setPassword] = useState<string>("finersac");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const onChangeEmail = (event: ChangeEvent<HTMLInputElement>) => {

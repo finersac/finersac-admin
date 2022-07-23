@@ -12,7 +12,7 @@ import Auth from "./layouts/Auth";
 
 // views without layouts
 
-import Landing from "./views/Landing";
+import ComingSoon from "./views/comming_soon/ComingSoon";
 import Profile from "./views/Profile";
 
 interface AppProps {
@@ -34,9 +34,9 @@ function App({ user }: AppProps): ReactElement {
           element={user ? <Navigate to="/admin/dashboard" /> : <Auth />}
         />
         {/* add routes without layouts */}
-        <Route path="/landing" element={<Landing />} />
         <Route path="/profile" element={<Profile />} />
-        <Route index element={<Landing />} />
+        <Route index element={<ComingSoon />} />
+        <Route path='*' element={ <Navigate to="/" />} />
         {/* add redirect for first page */}
       </Routes>
     </BrowserRouter>
